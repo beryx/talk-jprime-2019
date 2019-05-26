@@ -1,0 +1,31 @@
+if: tag IS blank
+
+language: java
+
+sudo: false
+
+jdk:
+  - openjdk11
+
+install:
+  - chmod a+x ./slides/gradlew
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: false
+  target-branch: gh-pages
+  local-dir: slides/build/asciidoc/html5
+  on:
+    branch: master
+
+cache:
+  directories:
+    - $HOME/.gradle
+
+script:
+  - cd slides
+  - ./gradlew asciidoc
+  - mv build/asciidoc/html5/java-module-system.html build/asciidoc/html5/index.html
+  - sed -i 's/http:\/\/cdnjs.cloudflare.com/https:\/\/cdnjs.cloudflare.com/g' build/asciidoc/html5/index.html

@@ -1,0 +1,93 @@
+plugins {
+    id 'application'
+}
+repositories {
+    jcenter()
+}
+
+ext.moduleName = 'org.example.jpms'
+mainClassName = 'org.example.jpms.XMLPrinter'
+
+dependencies {
+    implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.4.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.4.2'
+}
+test {
+    useJUnitPlatform()
+    testLogging.showStandardStreams = true
+}
+
+//tag::compile[]
+compileJava {
+    doFirst {
+        options.compilerArgs = ['--module-path', classpath.asPath]
+        classpath = files()
+    }
+}
+//end::compile[]
+
+//tag::run[]
+run {
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', moduleName
+        ]
+        classpath = files()
+    }
+}
+//end::run[]
+
+//tag::test-compile[]
+compileTestJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'org.junit.jupiter.api',
+                '--add-reads', "$moduleName=org.junit.jupiter.api",
+                '--patch-module',
+                "$moduleName=" + files(sourceSets.test.java.srcDirs).asPath,
+        ]
+        classpath = files()
+    }
+}
+//end::test-compile[]
+
+//tag::test-run[]
+test {
+    doFirst {
+        jvmArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'ALL-MODULE-PATH',
+                '--add-reads', "$moduleName=org.junit.jupiter.api",
+                '--patch-module',
+                "$moduleName=" + files(sourceSets.test.java.outputDir).asPath,
+                '--add-opens',
+                "$moduleName/org.example.jpms=org.junit.platform.commons"
+        ]
+        classpath = files()
+    }
+}
+//end::test-run[]
+
+//tag::startScripts[]
+import java.util.regex.Matcher
+startScripts {
+    doFirst {
+        defaultJvmOpts = [
+                '--module-path', 'LIB_DIR_PLACEHOLDER',
+                '--add-modules', moduleName,
+        ]
+    }
+    doLast{
+        def bashFile = new File(outputDir, applicationName)
+        bashFile.text = bashFile.text.replaceFirst('LIB_DIR_PLACEHOLDER',
+                                    Matcher.quoteReplacement('$APP_HOME/lib'))
+        def batFile = new File(outputDir, applicationName + ".bat")
+        batFile.text = batFile.text.replaceFirst('LIB_DIR_PLACEHOLDER',
+                                    Matcher.quoteReplacement('%APP_HOME%\\lib'))
+    }
+}
+//end::startScripts[]

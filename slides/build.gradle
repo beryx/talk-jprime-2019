@@ -1,0 +1,86 @@
+buildscript {
+    dependencies {
+        classpath 'org.ysb33r.gradle:vfs-gradle-plugin:1.0'
+        classpath 'commons-httpclient:commons-httpclient:3.1'
+    }
+}
+
+plugins {
+    id 'org.asciidoctor.convert' version '1.5.8.1'
+    id 'com.github.jruby-gradle.base' version '1.5.0'
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+apply plugin: 'org.ysb33r.vfs'
+apply plugin: 'org.asciidoctor.convert'
+
+version = jpmsTalkVersion
+
+ext {
+    deckjsVersion = 'master'
+    asciidoctorBackendVersion = 'master'
+    downloadDir = new File(buildDir,'download')
+    templateDir = new File(downloadDir,'templates')
+    deckjsDir   = new File(downloadDir,'deck.js')
+    deckjsVersionDir = new File(downloadDir,"deck.js-master")
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    gems 'rubygems:haml:5.0.4'
+    jrubyExec 'org.jruby:jruby-complete:9.2.5.0'
+}
+
+defaultTasks 'clean', 'asciidoctor'
+
+task download {
+    doLast {
+        mkdir downloadDir
+        vfs {
+            cp "zip:https://github.com/asciidoctor/asciidoctor-deck.js/archive/${asciidoctorBackendVersion}.zip!asciidoctor-deck.js-${asciidoctorBackendVersion}/templates", templateDir, recursive:true, overwrite:true, smash: true
+            cp "zip:https://github.com/imakewebthings/deck.js/archive/${deckjsVersion}.zip!deck.js-${deckjsVersion}", deckjsDir, recursive:true, overwrite:true, smash: true
+        }
+        deckjsVersionDir.renameTo(deckjsDir)
+    }
+}
+
+download {
+    description "Download extra deckjs resources"
+    outputs.dir templateDir
+    outputs.dir deckjsDir
+}
+
+asciidoctorj {
+    version = '1.5.7'
+}
+
+asciidoctor {
+    dependsOn jrubyPrepare
+
+    sources {
+        include 'java-module-system.adoc'
+    }
+
+    resources {
+        from (sourceDir) {
+            include 'img/**'
+            include 'deck.js/**'
+        }
+        from (downloadDir) {
+            include 'deck.js/**'
+        }
+    }
+
+    backends 'html5'
+
+    attributes \
+        'basedir': "$project.rootDir.parentFile.absolutePath",
+        'imagesdir': './img'
+
+    options template_dirs : [new File(templateDir,'haml').absolutePath ]
+
+    dependsOn download
+}

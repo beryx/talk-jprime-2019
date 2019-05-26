@@ -1,0 +1,678 @@
+
+= The Java Module System in practice
+:example-caption!:
+:deckjs_transition: fade
+:deckjs_theme: slides
+:navigation:
+:menu:
+:goto:
+:source-highlighter: prettify
+:mainjava: src/main/java
+:mainpath: {mainjava}/org/example/jpms
+:testjava: src/test/java
+:testpath: {testjava}/org/example/jpms
+:slide-start: pass:[<section class="slide"><div>]
+:slide-end: pass:[</div></section>]
+:vspace: pass:[&nbsp;<br>]
+:hspace: pass:[&nbsp; &nbsp; ]
+
+
+== About me
+
+[cols="80,20",grid=none,options=""]
+|===
+a|
+- [size125]#Software engineer#
+- [size125]#15+ years of experience in JVM based languages#
+- [size125]#Open-Source contributor#
+
+[cols="10,90",grid=none,options=""]
+!===
+
+a! a!
+{slide-start}
+image:copper-logo.jpg[link="https://copper-engine.org/"]
+{slide-end}
+!===
+
+[github size125]#&nbsp;https://github.com/siordache#
+
+[home size125]#&nbsp;https://beryx.org#
+
+[twitter size125]#&nbsp;https://twitter.com/beryx007[@beryx007]#
+
+a|
+[.thumb]
+image::scoop-logo.png[]
+
+[.thumb]
+image::Serban-Iordache.jpg[]
+
+[size125 bold serif]#&nbsp;&nbsp;Serban Iordache#
+
+|===
+
+
+== Java SE Modules  (Java 9)
+
+[.thumb]
+image::modules-java9.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+== Java SE Modules  (Java 9)
+
+[.thumb]
+image::modules-java9-deprecated.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+== Java SE Modules  (Java 11 and 12)
+
+[.thumb]
+image::modules-java11.jpg[width=2000]
+
+[small]#Adapted from: Marc Reinhold (https://twitter.com/mreinhold/status/882644292036026368)#
+
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source,scrollablecontent]
+.Product.java [small]#(scroll to see more code)#
+----
+include::{basedir}/prj-1/{mainpath}/Product.java[indent=0]
+----
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source]
+.XMLPrinter.java
+----
+include::{basedir}/prj-1/{mainpath}/XMLPrinter.java[indent=0]
+----
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source]
+.ProductTest.java
+----
+include::{basedir}/prj-1/{testpath}/ProductTest.java[indent=0]
+----
+
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source]
+.build.gradle
+----
+include::{basedir}/prj-1/build.gradle[indent=0]
+----
+
+
+== Replacements for removed modules
+
+[cols=".^20a,.^30a,.^70a",options="header"]
+|===
+| [size125]#Module name#  | [size125]#Package# | [size125]#Maven artifact#
+| [size125]#java.activation# | [size125]#javax.activation.*# | [size125]#com.sun.activation:javax.activation:1.2.0#
+| [size125]#java.corba#   | [size125]#javax.activity.&#42;# +
+[size125]#javax.rmi.&#42;# +
+[size125]#org.omg.&#42;# | [size125]#org.jboss.openjdk-orb:openjdk-orb:8.1.2.Final#
+| [size125]#java.transaction# | [size125]#javax.transaction.*# | [size125]#javax.transaction:javax.transaction-api:1.3#
+| [size125]#java.xml.bind# | [size125]#javax.xml.bind.*# | [size125]#org.glassfish.jaxb:jaxb-runtime:2.3.2#
+| [size125]#java.xml.ws#   | [size125]#javax.xml.ws.&#42;# +
+[size125]#javax.jws.&#42;# +
+[size125]#javax.soap.&#42;# | [size125]#com.sun.xml.ws:jaxws-ri:2.3.2#
+| [size125]#java.xml.ws.annotation# | [size125]#javax.annotation.*# | [size125]#javax.annotation:javax.annotation-api:1.3.2#
+|===
+
+
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source,linenums]
+.build.gradle
+----
+include::{basedir}/prj-1/build.gradle[indent=0]
+----
+
+== Dealing with removed modules
+// [headnote]#(Code from prj-1)#
+
+[source,linenums hlight11]
+.build.gradle
+----
+include::{basedir}/prj-1/build.gradle.java11[indent=0]
+----
+
+
+
+== Module descriptors
+
+[.thumb]
+image::module-info.png[]
+
+== Module descriptors
+
+[source]
+.module-info.java
+----
+module org.example.mylib {
+    requires java.desktop;
+    requires transitive java.sql;
+
+
+
+
+
+
+}
+----
+
+
+== Module descriptors
+
+[source]
+.module-info.java
+----
+module org.example.mylib {
+    requires java.desktop;
+    requires transitive java.sql;
+    exports org.example.mylib.core;
+    exports org.example.mylib.impl to org.example.gui;
+
+
+
+
+}
+----
+
+
+== Module descriptors
+
+[source]
+.module-info.java
+----
+module org.example.mylib {
+    requires java.desktop;
+    requires transitive java.sql;
+    exports org.example.mylib.core;
+    exports org.example.mylib.impl to org.example.gui;
+    opens org.example.mylib.model;
+    opens org.example.mylib.impl to java.xml.bind;
+
+
+}
+----
+
+
+== Module descriptors
+
+[source]
+.module-info.java
+----
+module org.example.mylib {
+    requires java.desktop;
+    requires transitive java.sql;
+    exports org.example.mylib.core;
+    exports org.example.mylib.impl to org.example.gui;
+    opens org.example.mylib.model;
+    opens org.example.mylib.impl to java.xml.bind;
+    uses javax.annotation.processing.Processor;
+    provides org.example.mylib.Solver with org.example.mylib.impl.MySolver;
+}
+----
+
+
+== VM arguments to break encapsulation
+
+[size125]#Options for the `javac` and `java` tools:#
+
+[%step]
+
+* [bold size125]#`--add-exports module/package=other-module(,other-module)*`# +
+[size125]#Specifies a package to be considered as exported from its defining module to additional modules.# +
+{vspace} +
+{vspace}
+
+* [bold size125]#`--add-reads module=other-module(,other-module)*`# +
+[size125]#Specifies additional modules to be considered as required by a given module.# +
+{vspace} +
+{vspace}
+
+* [bold size125]#`--add-opens module/package=target-module(,target-module)*`# +
+[size125]#Updates module to open package to target-module, regardless of module declaration.# +
+[size125]#(has no effect on javac)#
+
+== Classpath and module path
+
+[cols="2a",options="header"]
+[size150]#Specifying the classpath and the module-path with the javac and java tools:#
+|===
+| [size150]#classpath# | [size150]#module-path#
+
+a|
+[size150]#*`--class-path <path>`*# +
+[size150]#*`-classpath <path>`*# +
+[size150]#*`-cp <path>`*#
+
+a|
+[size150]#*`--module-path <path>`*# +
+[size150]#*`-p <path>`*#
+
+|===
+
+
+== Classpath and module path
+
+[size175]#You can mix `--class-path` and `--module-path`.#
+
+* [size150]#modular JAR on the module-path#
+* [size150]#modular JAR on the classpath#
+* [size150]#non-modular JAR on the module-path#
+* [size150]#non-modular JAR on the classpath#
+
+{slide-start}
+
+{vspace}
+[size175]#All code on the classpath is part of the *unnamed module*, which:#
+
+* [size150]#exports all code on the classpath#
+* [size150]#reads all other modules#
+* [size150]#it is readable only from _automatic modules_!#
+
+{slide-end}
+
+== Automatic modules
+[size150]#Non-modular JARs found on the module-path are turned into *automatic modules*.#
+
+[%step]
+
+* [size150]#A module descriptor is generated on the fly#
+** [size150]#it `requires transitive` all other resolved modules#
+** [size150]#it exports all its packages#
+** [size150]#it reads the _unnamed module_#
+
+== Split packages
+
+[size175]#Packages are not allowed to span different modules.#
+
+{slide-start}
+{vspace}
+[size150]#Dealing with split packages using the `javac` and `java` tools:#
+
+[bold size125]#`--patch-module module=file(:file)*`# +
+{hspace} [size150]#Merges all types from a list of artifacts into the given module.#
+
+{slide-end}
+
+{slide-start}
+
+{vspace}
+
+[source,html size110]
+.Example:
+----
+java
+  --module-path ...
+  --add-modules ...
+  --patch-module java.xml.ws.annotation=/path/to/my/lib/jsr305-3.0.2.jar
+  --module org.example.hello/org.example.hello.HelloWorld
+----
+
+{slide-end}
+
+
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source,size125]
+.module-info.java
+----
+include::{basedir}/prj-2/{mainjava}/module-info.java[indent=0]
+----
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source,linenums hlight13 hlight14]
+.XMLPrinter.java
+----
+include::{basedir}/prj-2/{mainpath}/XMLPrinter.java[indent=0]
+----
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source,linenums hlight11 hlight12]
+.ProductTest.java
+----
+include::{basedir}/prj-2/{testpath}/ProductTest.java[indent=0]
+----
+
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+{slide-start}
+[source]
+.To allow compilation:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=compile,indent=0]
+----
+{slide-end}
+
+{slide-start}
+[source]
+.To run on the module-path:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=run,indent=0]
+----
+{slide-end}
+
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source]
+.To compile the unit tests:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=test-compile,indent=0]
+----
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source]
+.To run the unit tests on the module-path:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=test-run,indent=0]
+----
+
+== Building a modular application with Gradle
+// [headnote]#(Code from prj-2)#
+
+[source]
+.To adjust the start scripts:
+----
+include::{basedir}/prj-2/build.no-plugin.gradle[tags=startScripts,indent=0]
+----
+
+
+== Using Gradle with the _moduleplugin_
+// [headnote]#(Code from prj-2)#
+
+[source,linenums hlight3]
+----
+include::{basedir}/prj-2/build.plugin.gradle[indent=0]
+----
+
+
+== Modular JARs compatible with Java 8 (or earlier)
+
+[size150]#1. compile all source files except `module-info.java`#
+
+* [size150]#specify a value &le; 8 for the `--release` option#
+
+[size150]#2. compile `module-info.java`#
+
+* [size150]#specify a value &ge; 9 for the `--release` option#
+
+* [size150]#include the location of the class files produced in step 1 in the value passed to the `--module-path` option#
+
+[size150]#3. create a JAR containing the class files produced in steps 1 and 2.#
+
+[%step]
+
+{vspace}
+[size150]#*Maven*: configure the pom.xml pass:[<a href="https://maven.apache.org/plugins/maven-compiler-plugin/examples/module-info.html">as shown in the documentation</a>].# +
+[size150]#*Gradle*: use the `org.javamodularity.moduleplugin` plugin.#
+
+== Modular JARs compatible with Java 8 (or earlier)
+// [headnote]#(Code from prj-3)#
+
+[source,linenums hlight5 hlight3 hlight5]
+.build.gradle
+----
+include::{basedir}/prj-3/build.modularity.gradle[indent=0]
+----
+
+
+== Custom runtime images for modular applications
+
+[size175]#*jlink*#:: [size175]#assembles and optimizes a set of modules and their dependencies into a custom runtime image#
+
+[%step]
+
+- [size150]#a custom runtime image is a special distribution containing the bare minimum to run an application.#
+
+- [size150]#you can create your own JRE.#
+
+- [size150]#you can use jlink only if all artifacts in the dependency graph are modularized!#
+
+
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-5)#
+
+[source,size110]
+.HelloWorldVerticle.java
+----
+include::{basedir}/prj-5/{mainjava}/com/example/HelloWorldVerticle.java[tags=code,indent=0]
+----
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-5)#
+
+[source,size110]
+.HelloWorldServer.java
+----
+include::{basedir}/prj-5/{mainjava}/com/example/HelloWorldServer.java[tags=code,indent=0]
+----
+
+{slide-start}
+
+[source,size110]
+.module-info.java
+----
+include::{basedir}/prj-5/{mainjava}/module-info.java[indent=0]
+----
+
+{slide-end}
+
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-5)#
+
+[source,size110]
+.build.gradle
+----
+include::{basedir}/prj-5/build.simple.gradle[indent=0]
+----
+
+
+== Custom runtime images for modular applications
+
+[size175]#*The ModiTect approach:*#
+
+* [size175]#for each non-modularized artifact in the dependency graph:#
+** [size175]#generate a module descriptor and add it to the artifact#
+
+{slide-start}
+
+{vspace}
+pass:[<a href="https://github.com/moditect/moditect/blob/master/README.md" class="size175">ModiTect</a>] [size175]#&nbsp;can be used with both Maven and Gradle.#
+
+{slide-end}
+
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-4)#
+
+[source,scrollablecontent]
+.pom.xml for the ModiTect approach [small]#(scroll to see more code)#
+----
+include::{basedir}/prj-4/pom.moditect.xml[tags=project,indent=0]
+----
+
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-4)#
+
+[source,scrollablecontent]
+.build.gradle for the ModiTect approach [small]#(scroll to see more code)#
+----
+include::{basedir}/prj-4/build.gradle[indent=0]
+----
+
+
+
+== Custom runtime images for modular applications
+[size175]#*The "badass" approach*#
+
+* [size175]#Combine all non-modular artifacts into a _merged module_.#
+* [size175]#Modularize the merged module.#
+// * Create _delegating modules_ for each artifact contained in the merged module.
+
+{vspace}
+
+{slide-start}
+
+[size175]#This approach is taken by the pass:[<a href="https://github.com/beryx/badass-jlink-plugin/blob/master/README.md">badass-jlink</a>] Gradle plugin.#
+
+{slide-end}
+
+
+== Custom runtime images for modular applications
+// [headnote]#(Code from prj-5)#
+
+[source,linenums hlight4 hlight13 hlight14 hlight15 hlight16 hlight17 hlight18 hlight19 hlight20 hlight21 hlight22 hlight23 ]
+.build.gradle for the "badass" approach
+----
+include::{basedir}/prj-5/build.gradle[indent=0]
+----
+
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[size175]#*jpackage*#
+
+- [size175]#a tool for packaging self-contained Java applications along with a Java Runtime Environment.#
+- [size175]#allows Java applications to be distributed, installed, and uninstalled in a manner that is familiar to users.#
+- [size175]#based on the JavaFX `javapackager` tool (removed in OpenJDK 11)#
+- [size175]#available in OpenJDK 13+#
+
+[%step]
+
+[size175]#The _badass-jlink_ plugin provides a `jpackage` task for creating a platform-specific application installer.#
+
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[source,size110]
+.build.gradle
+----
+include::{basedir}/prj-6/{mainpath}/hellofx/HelloFX.java[tags=class,indent=0]
+----
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[source,size125]
+.module-info.java
+----
+include::{basedir}/prj-6/{mainjava}/module-info.java[indent=0]
+----
+
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[source,linenums]
+.build.gradle
+----
+include::{basedir}/prj-6/build.gradle[indent=0]
+----
+
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[source,linenums hlight3 hlight7 hlight8 hlight9]
+.build.gradle
+----
+include::{basedir}/prj-6/build.gradle[indent=0]
+----
+
+
+== Creating application installers with jpackage
+// [headnote]#(Code from prj-6)#
+
+[source,linenums hlight15 hlight16 hlight17 hlight18 hlight19]
+.build.gradle
+----
+include::{basedir}/prj-6/build.gradle[indent=0]
+----
+
+
+== Custom runtime images for non-modular applications
+
+[size175]#Approach:#
+
+* [size175]#create a custom runtime image containing only the JDK modules required by the application# +
+&nbsp;
+* [size175]#copy all the classes and dependencies along with the start scripts of your application into to the directory of the custom Java runtime image#
+
+
+
+{slide-start}
+
+{vspace}
+[size175]#This approach is taken by the pass:[<a href="https://github.com/beryx/badass-runtime-plugin/blob/master/README.md">badass-runtime</a>] Gradle plugin.#
+
+{slide-end}
+
+
+== Custom runtime images for non-modular applications
+// [headnote]#(Code from prj-7)#
+
+[source,linenums hlight3 hlight14 hlight15 hlight16 hlight17 hlight18]
+.build.gradle
+----
+include::{basedir}/prj-7/build.gradle[indent=0]
+----
+
+
+== Resources
+
+[size125]#*Code and slides of this talk: https://github.com/beryx/talk-jprime-2019*#
+
+[size110]#*Gradle*#
+
+* [size110]#Build, test, run, create start scripts: https://github.com/java9-modularity/gradle-modules-plugin[gradle-modules-plugin]#
+
+* [size110]#Create modular JARs targeting Java 8 or older: https://github.com/java9-modularity/gradle-modules-plugin#compilation-to-a-specific-java-release[gradle-modules-plugin]#
+
+* [size110]#Create custom runtime images of modular applications:# +
+[size110]#&nbsp;&nbsp;&nbsp;&nbsp; https://github.com/beryx/badass-jlink-plugin[badass-jlink-plugin]# +
+[size110]#&nbsp;&nbsp;&nbsp;&nbsp; https://github.com/moditect/moditect-gradle-plugin[moditect-gradle-plugin]#
+
+* [size110]#Create platform-specific application installers: https://github.com/beryx/badass-jlink-plugin[badass-jlink-plugin]#
+
+* [size110]#Create custom runtime images of non-modular applications: https://github.com/beryx/badass-runtime-plugin[badass-runtime-plugin]#
+
+* [size110]#Use OpenJFX: https://github.com/openjfx/javafx-gradle-plugin[javafx-gradle-plugin]#
+
+
+[size110]#*Maven*#
+
+* [size110]#Generate and add module descriptors, create modular JARs targeting Java 8 or older,
+create custom runtime images of modular applications: https://github.com/moditect/moditect[ModiTect]#

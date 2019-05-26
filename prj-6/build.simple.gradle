@@ -1,0 +1,9 @@
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.7'
+}
+repositories { jcenter() }
+javafx {
+    modules = ['javafx.controls']
+}
+mainClassName = "org.example.jpms.hellofx/org.example.jpms.hellofx.HelloFX"

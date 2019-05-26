@@ -1,0 +1,16 @@
+plugins {
+    id 'application'
+    id "org.javamodularity.moduleplugin" version "1.5.0"
+}
+repositories { jcenter() }
+
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+def platform = currentOS.isMacOsX() ? 'mac' : 
+                            currentOS.isLinux() ? 'linux' : 'win'
+dependencies {
+    implementation compile("org.openjfx:javafx-base:11:${platform}")
+    implementation compile("org.openjfx:javafx-graphics:11:${platform}")
+    implementation compile("org.openjfx:javafx-controls:11:${platform}")
+}
+
+mainClassName = "org.example.jpms.hellofx/org.example.jpms.hellofx.HelloFX"
