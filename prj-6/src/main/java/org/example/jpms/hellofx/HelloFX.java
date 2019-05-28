@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 public class HelloFX extends Application {
     @Override
     public void start(Stage stage) {
-        Label label = new Label("Hello, JPrime!");
+        Label label = new Label("Hello, jPrime!");
         label.setFont(Font.font(48));
         StackPane pane = new StackPane(label);
         Scene scene = new Scene(pane, 480, 320);
