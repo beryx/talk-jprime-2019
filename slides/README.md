@@ -7,4 +7,4 @@ To generate the slides execute:
 ```
 ./gradlew asciidoc
 ```
-Then, open the file `build/asciidoc/html5/kotlin-slides.html` in your browser.
+Then, open the file `build/asciidoc/html5/java-module-system.html` in your browser.
